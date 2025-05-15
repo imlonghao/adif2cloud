@@ -1,0 +1,9 @@
+source:
+- /path1/to/1.adi
+- /path2/to/2.adi
+
+target:
+- type: wavelog
+  api_url: "https://<your.wavelog.domain>/index.php/api/qso"
+  api_key: wlyourwavelogapikey
+  station_profile_id: 3
