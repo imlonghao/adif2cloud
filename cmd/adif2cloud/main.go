@@ -57,43 +57,40 @@ func main() {
 		}
 	}
 
-	// Get source file configurations
-	var sources []string
-	if err := viper.UnmarshalKey("source", &sources); err != nil {
-		slog.Error("Failed to parse source configuration", "error", err)
+	// Get source file configuration
+	sourceFile := viper.GetString("source")
+	if sourceFile == "" {
+		slog.Error("Source file path is empty in configuration")
 		os.Exit(1)
 	}
 
-	// Create watchers for each source file
-	var watchers []*watcher.ADIWatcher
-	for _, source := range sources {
-		// Create callback function to send to all targets
-		adiWatcher, err := watcher.NewADIWatcher(source, func(adiString string) {
-			slog.Info("Found new QSO record", "adi", adiString, "source", source)
+	// Create watcher for the source file
+	var adiWatcher *watcher.ADIWatcher
 
-			// Send to all Wavelog clients
-			for _, client := range wavelogClients {
-				if err := client.SendQSO(adiString); err != nil {
-					slog.Error("Failed to send QSO record", "error", err)
-					continue
-				}
-				slog.Info("QSO record sent to Wavelog")
+	// Create callback function to send to all targets
+	adiWatcher, err := watcher.NewADIWatcher(sourceFile, func(adiString string) {
+		slog.Info("Found new QSO record", "adi", adiString, "source", sourceFile)
+
+		// Send to all Wavelog clients
+		for _, client := range wavelogClients {
+			if err := client.SendQSO(adiString); err != nil {
+				slog.Error("Failed to send QSO record", "error", err)
+				continue
 			}
-		})
-		if err != nil {
-			slog.Error("Failed to create ADI file watcher", "error", err, "source", source)
-			continue
+			slog.Info("QSO record sent to Wavelog")
 		}
-
-		// Start the watcher
-		if err := adiWatcher.Start(); err != nil {
-			slog.Error("Failed to start ADI file watcher", "error", err, "source", source)
-			continue
-		}
-		slog.Info("Started monitoring ADI file", "path", source)
-
-		watchers = append(watchers, adiWatcher)
+	})
+	if err != nil {
+		slog.Error("Failed to create ADI file watcher", "error", err, "source", sourceFile)
+		os.Exit(1)
 	}
+
+	// Start the watcher
+	if err := adiWatcher.Start(); err != nil {
+		slog.Error("Failed to start ADI file watcher", "error", err, "source", sourceFile)
+		os.Exit(1)
+	}
+	slog.Info("Started monitoring ADI file", "path", sourceFile)
 
 	// Wait for interrupt signal
 	sigChan := make(chan os.Signal, 1)
@@ -102,9 +99,9 @@ func main() {
 
 	// Graceful shutdown
 	slog.Info("Shutting down...")
-	for i, w := range watchers {
-		if err := w.Close(); err != nil {
-			slog.Error("Failed to close ADI file watcher", "error", err, "source", sources[i])
+	if adiWatcher != nil {
+		if err := adiWatcher.Close(); err != nil {
+			slog.Error("Failed to close ADI file watcher", "error", err, "source", sourceFile)
 		}
 	}
 	slog.Info("Safely exited")

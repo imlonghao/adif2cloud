@@ -20,9 +20,7 @@ go install git.esd.cc/imlonghao/adif2cloud@latest
 Create a `config.yaml` file in your running directory:
 
 ```yaml
-source:
-- /path1/to/1.adi
-- /path2/to/2.adi
+source: /path/to/your/adif_file.adi
 
 target:
 - type: wavelog
