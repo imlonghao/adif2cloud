@@ -17,16 +17,24 @@ go install git.esd.cc/imlonghao/adif2cloud@latest
 
 ## Configuration
 
-Create a `config.yaml` file in your running directory:
+Create a `config.yaml` file in your running directory with content similar to the following example:
 
 ```yaml
 source: /path/to/your/adif_file.adi
 
 target:
-- type: wavelog
-  api_url: "https://<your.wavelog.domain>/index.php/api/qso"
-  api_key: wlyourwavelogapikey
-  station_profile_id: 3
+  - type: wavelog
+    api_url: "https://your.wavelog.domain/index.php/api/qso"
+    api_key: "wlyourwavelogapikey"
+    station_profile_id: 1
+  - type: s3
+    endpoint: "https://s3.your-region.amazonaws.com" # e.g., s3.amazonaws.com or your MinIO endpoint
+    region: "your-region" # e.g., us-east-1
+    access_key_id: "YOUR_AWS_ACCESS_KEY_ID" # Your S3 access key ID
+    secret_access_key: "YOUR_AWS_SECRET_ACCESS_KEY" # Your S3 secret access key
+    bucket_name: "your-adif-backup-bucket" # Required: Name of your S3 bucket
+    use_path_style: false # Optional: Set to true for MinIO or S3 compatible services requiring path-style addressing (defaults to false if omitted)
+    file_name: "adif_file.adi" # Optional: Name of the file to upload to S3 (defaults to the source file name if omitted)
 ```
 
 ## Usage
