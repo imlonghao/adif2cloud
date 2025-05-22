@@ -115,6 +115,58 @@ func main() {
 		os.Exit(1)
 	}
 
+	// 获取本地文件大小
+	localFileInfo, err := os.Stat(sourceFile)
+	if err != nil {
+		slog.Error("Failed to get local file info", "error", err, "source", sourceFile)
+		os.Exit(1)
+	}
+	localSize := localFileInfo.Size()
+
+	// 遍历所有 providers 获取远程文件大小
+	var maxRemoteSize int64
+	var maxRemoteProvider provider.Provider
+	for _, p := range providers {
+		remoteSize, err := p.GetSize()
+		if err != nil {
+			slog.Warn("Failed to get remote file size", "error", err)
+			continue
+		}
+		if remoteSize > maxRemoteSize {
+			maxRemoteSize = remoteSize
+			maxRemoteProvider = p
+		}
+	}
+
+	// 如果远程文件更大，则下载替换本地文件
+	if maxRemoteSize > localSize {
+		slog.Info("Remote file is larger, downloading...",
+			"local_size", localSize,
+			"remote_size", maxRemoteSize)
+
+		// 创建临时文件
+		tmpFile, err := os.CreateTemp("", "adif2cloud-*.adi")
+		if err != nil {
+			slog.Error("Failed to create temp file", "error", err)
+			os.Exit(1)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		// 下载远程文件到临时文件
+		if err := maxRemoteProvider.Download(tmpFile); err != nil {
+			slog.Error("Failed to download remote file", "error", err)
+			os.Exit(1)
+		}
+		tmpFile.Close()
+
+		// 替换本地文件
+		if err := os.Rename(tmpFile.Name(), sourceFile); err != nil {
+			slog.Error("Failed to replace local file", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("Successfully replaced local file with remote file")
+	}
+
 	// Create watcher for the source file
 	adiWatcher, err := watcher.NewADIWatcher(sourceFile, func(adiString string) {
 		slog.Info("Found new QSO record", "adi", adiString, "source", sourceFile)
