@@ -5,10 +5,10 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 
-	"git.esd.cc/imlonghao/adif2cloud/pkg/s3uploader"
+	"git.esd.cc/imlonghao/adif2cloud/pkg/provider"
+	"git.esd.cc/imlonghao/adif2cloud/pkg/s3"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/watcher"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/wavelog"
 
@@ -40,10 +40,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Create Wavelog clients and S3 Uploaders
-	var wavelogClients []*wavelog.Client
-	var s3Uploaders []s3uploader.Uploader
-	var s3Configs []s3uploader.S3Config
+	// Create providers
+	var providers []provider.Provider
 
 	for _, target := range targets {
 		if targetType, ok := target["type"].(string); ok {
@@ -62,12 +60,12 @@ func main() {
 					continue
 				}
 
-				wavelogClient := wavelog.NewClient(apiURL, apiKey, stationProfileID)
-				wavelogClients = append(wavelogClients, wavelogClient)
-				slog.Info("Created Wavelog client", "api_url", apiURL, "station_profile_id", stationProfileID)
+				wavelogProvider := wavelog.NewWavelogProvider(apiURL, apiKey, stationProfileID)
+				providers = append(providers, wavelogProvider)
+				slog.Info("Created Wavelog provider", "api_url", apiURL, "station_profile_id", stationProfileID)
 
 			case "s3":
-				s3Config := s3uploader.S3Config{}
+				s3Config := s3.S3Config{}
 				if endpoint, ok := target["endpoint"].(string); ok {
 					s3Config.Endpoint = endpoint
 				}
@@ -95,14 +93,13 @@ func main() {
 					continue
 				}
 
-				uploader, err := s3uploader.NewS3Uploader(s3Config)
+				s3Provider, err := s3.NewS3Provider(s3Config)
 				if err != nil {
-					slog.Error("Failed to create S3 uploader", "error", err, "config", s3Config)
+					slog.Error("Failed to create S3 provider", "error", err, "config", s3Config)
 					continue
 				}
-				s3Uploaders = append(s3Uploaders, uploader)
-				s3Configs = append(s3Configs, s3Config)
-				slog.Info("Created S3 Uploader", "endpoint", s3Config.Endpoint, "bucket", s3Config.BucketName)
+				providers = append(providers, s3Provider)
+				slog.Info("Created S3 provider", "endpoint", s3Config.Endpoint, "bucket", s3Config.BucketName)
 			default:
 				slog.Warn("Unknown target type", "type", targetType)
 			}
@@ -119,35 +116,16 @@ func main() {
 	}
 
 	// Create watcher for the source file
-	var adiWatcher *watcher.ADIWatcher
-
-	// Create callback function to send to all targets
 	adiWatcher, err := watcher.NewADIWatcher(sourceFile, func(adiString string) {
 		slog.Info("Found new QSO record", "adi", adiString, "source", sourceFile)
 
-		// Send to all Wavelog clients
-		for _, client := range wavelogClients {
-			if err := client.SendQSO(adiString); err != nil {
-				slog.Error("Failed to send QSO record to Wavelog", "error", err)
+		// Send to all providers
+		for _, p := range providers {
+			if err := p.Upload(sourceFile, adiString); err != nil {
+				slog.Error("Failed to upload to provider", "error", err)
 				continue
 			}
-			slog.Info("QSO record sent to Wavelog")
-		}
-
-		// Upload the entire source file to S3, overwriting if it exists
-		for i, uploader := range s3Uploaders {
-			s3Cfg := s3Configs[i]
-			objectKey := s3Cfg.FileName
-			if objectKey == "" {
-				objectKey = filepath.Base(sourceFile)
-			}
-
-			slog.Info("Attempting to upload file to S3", "source_file", sourceFile, "bucket", s3Cfg.BucketName, "object_key", objectKey)
-			if err := uploader.UploadFile(sourceFile, objectKey); err != nil {
-				slog.Error("Failed to upload file to S3", "error", err, "source_file", sourceFile, "bucket", s3Cfg.BucketName, "key", objectKey)
-			} else {
-				slog.Info("Successfully uploaded file to S3", "source_file", sourceFile, "bucket", s3Cfg.BucketName, "key", objectKey)
-			}
+			slog.Info("Successfully uploaded to provider")
 		}
 	})
 	if err != nil {
