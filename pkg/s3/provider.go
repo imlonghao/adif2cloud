@@ -1,10 +1,11 @@
 package s3
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"strings"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -82,14 +83,16 @@ func (p *S3Provider) Download(w io.Writer) error {
 }
 
 // Upload 上传文件到 S3
-func (p *S3Provider) Upload(filename string, line string) error {
-	// 创建一个包含单行内容的 reader
-	reader := strings.NewReader(line)
+func (p *S3Provider) Upload(filename string, _ string) error {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
 
-	_, err := p.client.PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = p.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(p.bucketName),
-		Key:    aws.String(filename),
-		Body:   reader,
+		Key:    aws.String(p.fileName),
+		Body:   bytes.NewReader(content),
 	})
 	return err
 }
