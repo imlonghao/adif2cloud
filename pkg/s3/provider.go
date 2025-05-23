@@ -42,9 +42,9 @@ func NewS3Provider(cfg S3Config) (*S3Provider, error) {
 	}
 
 	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
-		if cfg.UsePathStyle {
-			o.UsePathStyle = true
-		}
+		o.UsePathStyle = cfg.UsePathStyle
+		o.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+		o.ResponseChecksumValidation = aws.ResponseChecksumValidationWhenRequired
 	})
 
 	return &S3Provider{
