@@ -169,7 +169,7 @@ func main() {
 				logger.Error("Failed to upload to provider", "error", err)
 				continue
 			}
-			logger.Info("Successfully uploaded to provider", "provider", p.GetName())
+			logger.Info("Successfully uploaded to provider")
 		}
 	})
 	if err != nil {
