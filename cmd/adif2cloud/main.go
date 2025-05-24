@@ -144,26 +144,18 @@ func main() {
 			"local_size", localSize,
 			"remote_size", maxRemoteSize)
 
-		// 创建临时文件
-		tmpFile, err := os.CreateTemp("", "adif2cloud-*.adi")
+		sourceFileWriter, err := os.OpenFile(sourceFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
-			slog.Error("Failed to create temp file", "error", err)
+			slog.Error("Failed to open local file", "error", err)
 			os.Exit(1)
 		}
-		defer os.Remove(tmpFile.Name())
-
-		// 下载远程文件到临时文件
-		if err := maxRemoteProvider.Download(tmpFile); err != nil {
+		// 直接下载到目标文件
+		if err := maxRemoteProvider.Download(sourceFileWriter); err != nil {
 			slog.Error("Failed to download remote file", "error", err)
 			os.Exit(1)
 		}
-		tmpFile.Close()
+		sourceFileWriter.Close()
 
-		// 替换本地文件
-		if err := os.Rename(tmpFile.Name(), sourceFile); err != nil {
-			slog.Error("Failed to replace local file", "error", err)
-			os.Exit(1)
-		}
 		slog.Info("Successfully replaced local file with remote file")
 	}
 
