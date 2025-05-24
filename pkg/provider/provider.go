@@ -14,4 +14,7 @@ type Provider interface {
 
 	// Upload 上传文件或新增行到远程端
 	Upload(filename string, line string) error
+
+	// GetName 获取提供商的名称
+	GetName() string
 }

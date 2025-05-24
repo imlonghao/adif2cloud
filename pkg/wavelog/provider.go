@@ -34,3 +34,8 @@ func (p *WavelogProvider) Upload(_ string, line string) error {
 	// 将内容作为 QSO 记录发送
 	return p.client.SendQSO(line)
 }
+
+// GetName 获取提供商的名称
+func (p *WavelogProvider) GetName() string {
+	return fmt.Sprintf("Wavelog-%s-%d", p.client.apiURL, p.client.stationProfileID)
+}

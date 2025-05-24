@@ -118,7 +118,7 @@ func main() {
 	// 获取本地文件大小
 	localFileInfo, err := os.Stat(sourceFile)
 	if err != nil {
-		slog.Error("Failed to get local file info", "error", err, "source", sourceFile)
+		slog.Error("Failed to get local file info", "error", err)
 		os.Exit(1)
 	}
 	localSize := localFileInfo.Size()
@@ -161,25 +161,25 @@ func main() {
 
 	// Create watcher for the source file
 	adiWatcher, err := watcher.NewADIWatcher(sourceFile, func(adiString string) {
-		slog.Info("Found new QSO record", "adi", adiString, "source", sourceFile)
-
+		slog.Info("Found new QSO record", "adi", adiString)
 		// Send to all providers
 		for _, p := range providers {
+			logger := slog.With("provider", p.GetName())
 			if err := p.Upload(sourceFile, adiString); err != nil {
-				slog.Error("Failed to upload to provider", "error", err)
+				logger.Error("Failed to upload to provider", "error", err)
 				continue
 			}
-			slog.Info("Successfully uploaded to provider")
+			logger.Info("Successfully uploaded to provider", "provider", p.GetName())
 		}
 	})
 	if err != nil {
-		slog.Error("Failed to create ADI file watcher", "error", err, "source", sourceFile)
+		slog.Error("Failed to create ADI file watcher", "error", err)
 		os.Exit(1)
 	}
 
 	// Start the watcher
 	if err := adiWatcher.Start(); err != nil {
-		slog.Error("Failed to start ADI file watcher", "error", err, "source", sourceFile)
+		slog.Error("Failed to start ADI file watcher", "error", err)
 		os.Exit(1)
 	}
 	slog.Info("Started monitoring ADI file", "path", sourceFile)
@@ -193,7 +193,7 @@ func main() {
 	slog.Info("Shutting down...")
 	if adiWatcher != nil {
 		if err := adiWatcher.Close(); err != nil {
-			slog.Error("Failed to close ADI file watcher", "error", err, "source", sourceFile)
+			slog.Error("Failed to close ADI file watcher", "error", err)
 		}
 	}
 	slog.Info("Safely exited")
