@@ -37,5 +37,5 @@ func (p *WavelogProvider) Upload(_ string, line string) error {
 
 // GetName 获取提供商的名称
 func (p *WavelogProvider) GetName() string {
-	return fmt.Sprintf("Wavelog-%s-%d", p.client.apiURL, p.client.stationProfileID)
+	return fmt.Sprintf("Wavelog->%s->%d", p.client.apiURL, p.client.stationProfileID)
 }

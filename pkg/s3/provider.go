@@ -99,5 +99,5 @@ func (p *S3Provider) Upload(filename string, _ string) error {
 
 // GetName 获取提供商的名称
 func (p *S3Provider) GetName() string {
-	return fmt.Sprintf("S3-%s-%s", *p.client.Options().BaseEndpoint, p.bucketName)
+	return fmt.Sprintf("S3->%s->%s", *p.client.Options().BaseEndpoint, p.bucketName)
 }
