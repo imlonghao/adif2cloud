@@ -35,6 +35,16 @@ target:
     bucket_name: "your-adif-backup-bucket" # Required: Name of your S3 bucket
     use_path_style: false # Optional: Set to true for MinIO or S3 compatible services requiring path-style addressing (defaults to false if omitted)
     file_name: "adif_file.adi" # Optional: Name of the file to upload to S3 (defaults to the source file name if omitted)
+  - type: git
+    repo_url: "https://github.com/your-username/your-repo.git"
+    branch: "main"
+    file_name: "adif_file.adi"
+    commit_author: "Your Name <your.email@example.com>"
+    commit_email: "your.email@example.com"
+    auth_username: "your-github-username"
+    auth_password: "your-github-password"
+    auth_ssh_key: "/path/to/your-ssh-key"
+    auth_ssh_key_passphrase: "your-ssh-key-passphrase"
 ```
 
 ## Usage
