@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"git.esd.cc/imlonghao/adif2cloud/pkg/clublog"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/provider"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/s3"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/watcher"
@@ -63,6 +64,27 @@ func main() {
 				wavelogProvider := wavelog.NewWavelogProvider(apiURL, apiKey, stationProfileID)
 				providers = append(providers, wavelogProvider)
 				slog.Info("Created Wavelog provider", "api_url", apiURL, "station_profile_id", stationProfileID)
+
+			case "clublog":
+				email, _ := target["email"].(string)
+				password, _ := target["password"].(string)
+				callsign, _ := target["callsign"].(string)
+				if email == "" || password == "" || callsign == "" {
+					slog.Error("email, password or callsign is missing for clublog target", "target", target)
+					continue
+				}
+
+				clublogProvider := clublog.NewClubLogProvider(clublog.ClubLogConfig{
+					Email:    email,
+					Password: password,
+					Callsign: callsign,
+				})
+				if clublogProvider == nil {
+					slog.Error("Failed to create Club Log provider", "email", email, "callsign", callsign)
+					continue
+				}
+				providers = append(providers, clublogProvider)
+				slog.Info("Created Club Log provider", "email", email, "callsign", callsign)
 
 			case "s3":
 				s3Config := s3.S3Config{}

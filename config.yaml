@@ -23,3 +23,7 @@ target:
     auth_password: "your-github-password"
     auth_ssh_key: "/path/to/your-ssh-key"
     auth_ssh_key_passphrase: "your-ssh-key-passphrase"
+  - type: clublog
+    email: "your.email@example.com"
+    password: "your-clublog-password"
+    callsign: BA0AN
