@@ -28,7 +28,7 @@ func NewClubLogProvider(cfg ClubLogConfig) *ClubLogProvider {
 		slog.Error("apiKey is not set")
 		return nil
 	}
-	slog.Info("Creating Club Log provider",
+	slog.Debug("Creating Club Log provider",
 		"email", cfg.Email,
 		"callsign", cfg.Callsign)
 	return &ClubLogProvider{

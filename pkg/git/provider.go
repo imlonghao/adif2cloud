@@ -36,6 +36,7 @@ type GitProvider struct {
 }
 
 func NewGitProvider(config GitConfig) (*GitProvider, error) {
+	slog.Debug("Creating Git provider", "repo_url", config.RepoURL, "branch", config.Branch)
 	// 配置认证方式
 	var auth transport.AuthMethod
 	if config.AuthSSHKey != "" {

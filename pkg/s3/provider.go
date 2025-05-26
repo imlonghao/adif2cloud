@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -33,6 +34,7 @@ type S3Provider struct {
 
 // NewS3Provider 创建一个新的 S3Provider 实例
 func NewS3Provider(cfg S3Config) (*S3Provider, error) {
+	slog.Debug("Creating S3 provider", "endpoint", cfg.Endpoint, "bucket", cfg.BucketName)
 	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(cfg.Region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(cfg.AccessKeyID, cfg.SecretAccessKey, "")),

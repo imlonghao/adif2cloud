@@ -23,7 +23,7 @@ type QSORequest struct {
 }
 
 func NewClient(apiURL, apiKey string, stationProfileID int) *Client {
-	slog.Info("Creating Wavelog client",
+	slog.Debug("Creating Wavelog client",
 		"api_url", apiURL,
 		"station_profile_id", stationProfileID)
 	return &Client{
