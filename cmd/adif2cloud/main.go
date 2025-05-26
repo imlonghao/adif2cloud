@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"git.esd.cc/imlonghao/adif2cloud/pkg/clublog"
+	"git.esd.cc/imlonghao/adif2cloud/pkg/git"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/provider"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/s3"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/watcher"
@@ -85,6 +86,49 @@ func main() {
 				}
 				providers = append(providers, clublogProvider)
 				slog.Info("Created Club Log provider", "email", email, "callsign", callsign)
+
+			case "git":
+				gitConfig := git.GitConfig{}
+				if repoURL, ok := target["repo_url"].(string); ok {
+					gitConfig.RepoURL = repoURL
+				}
+				if branch, ok := target["branch"].(string); ok {
+					gitConfig.Branch = branch
+				}
+				if fileName, ok := target["file_name"].(string); ok {
+					gitConfig.FileName = fileName
+				}
+				if commitAuthor, ok := target["commit_author"].(string); ok {
+					gitConfig.CommitAuthor = commitAuthor
+				}
+				if commitEmail, ok := target["commit_email"].(string); ok {
+					gitConfig.CommitEmail = commitEmail
+				}
+				if authUsername, ok := target["auth_username"].(string); ok {
+					gitConfig.AuthUsername = authUsername
+				}
+				if authPassword, ok := target["auth_password"].(string); ok {
+					gitConfig.AuthPassword = authPassword
+				}
+				if authSSHKey, ok := target["auth_ssh_key"].(string); ok {
+					gitConfig.AuthSSHKey = authSSHKey
+				}
+				if authSSHKeyPassphrase, ok := target["auth_ssh_key_passphrase"].(string); ok {
+					gitConfig.AuthSSHKeyPassphrase = authSSHKeyPassphrase
+				}
+
+				if gitConfig.RepoURL == "" {
+					slog.Error("repo_url is required for git target", "target", target)
+					continue
+				}
+
+				gitProvider, err := git.NewGitProvider(gitConfig)
+				if err != nil {
+					slog.Error("Failed to create Git provider", "error", err, "config", gitConfig)
+					continue
+				}
+				providers = append(providers, gitProvider)
+				slog.Info("Created Git provider", "repo_url", gitConfig.RepoURL, "branch", gitConfig.Branch)
 
 			case "s3":
 				s3Config := s3.S3Config{}
