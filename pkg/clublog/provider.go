@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-const API_KEY = ""
+var apiKey = ""
 
 // ClubLogConfig 定义了 Club Log 配置
 type ClubLogConfig struct {
@@ -24,8 +24,8 @@ type ClubLogProvider struct {
 
 // NewClubLogProvider 创建一个新的 ClubLogProvider 实例
 func NewClubLogProvider(cfg ClubLogConfig) *ClubLogProvider {
-	if API_KEY == "" {
-		slog.Error("API_KEY is not set")
+	if apiKey == "" {
+		slog.Error("apiKey is not set")
 		return nil
 	}
 	slog.Info("Creating Club Log provider",
@@ -56,7 +56,7 @@ func (p *ClubLogProvider) Upload(_ string, line string) error {
 	formData.Set("password", p.config.Password)
 	formData.Set("callsign", p.config.Callsign)
 	formData.Set("adif", line)
-	formData.Set("api", API_KEY)
+	formData.Set("api", apiKey)
 
 	// 发送 POST 请求
 	resp, err := http.PostForm("https://clublog.org/realtime.php", formData)
