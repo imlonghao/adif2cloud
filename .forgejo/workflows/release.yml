@@ -1,0 +1,39 @@
+name: Release a new version
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - name: Install dependency
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends upx
+      - name: Setup go
+        uses: https://github.com/actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        with:
+          go-version: '>=1.23.4'
+      - name: Build
+        env:
+          CLUBLOG_API_KEY: ${{ secrets.CLUBLOG_API_KEY }}
+        run: |
+          go generate ./...
+          GOOS=windows GOARCH=amd64 go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags "-s -w -X git.esd.cc/imlonghao/adif2cloud/pkg/clublog.apiKey=${CLUBLOG_API_KEY}" -o adif2cloud-amd64.exe cmd/adif2cloud/main.go
+          GOOS=linux GOARCH=amd64 go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags "-s -w -X git.esd.cc/imlonghao/adif2cloud/pkg/clublog.apiKey=${CLUBLOG_API_KEY}" -o adif2cloud-linux-amd64 cmd/adif2cloud/main.go
+      - name: Compress
+        run: |
+          upx --lzma adif2cloud-amd64.exe
+          upx --lzma adif2cloud-linux-amd64
+      - name: Release
+        uses: https://gitea.com/actions/release-action@21a5938ff2548f6472d89ba13b3cdd8af4c67068 # main
+        with:
+          files: |-
+            adif2cloud-amd64.exe
+            adif2cloud-linux-amd64
+          api_key: ${{ secrets.IMLONGHAO_BOT_TOKEN }}
