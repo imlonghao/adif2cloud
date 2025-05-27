@@ -33,6 +33,7 @@ type GitConfig struct {
 type GitProvider struct {
 	config GitConfig
 	repo   *git.Repository
+	auth   transport.AuthMethod
 }
 
 func NewGitProvider(config GitConfig) (*GitProvider, error) {
@@ -113,11 +114,12 @@ func NewGitProvider(config GitConfig) (*GitProvider, error) {
 	return &GitProvider{
 		config: config,
 		repo:   repo,
+		auth:   auth,
 	}, nil
 }
 
 func (p *GitProvider) GetName() string {
-	return fmt.Sprintf("git->%s", p.config.RepoURL)
+	return fmt.Sprintf("Git->%s", p.config.RepoURL)
 }
 
 func (p *GitProvider) GetSize() (int64, error) {
@@ -159,7 +161,9 @@ func (p *GitProvider) Upload(sourceFilePath string, _ string) error {
 		return fmt.Errorf("failed to get worktree: %w", err)
 	}
 
-	err = worktree.Pull(&git.PullOptions{})
+	err = worktree.Pull(&git.PullOptions{
+		Auth: p.auth,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to pull: %w", err)
 	}
@@ -193,6 +197,7 @@ func (p *GitProvider) Upload(sourceFilePath string, _ string) error {
 			Email: p.config.CommitEmail,
 			When:  time.Now(),
 		},
+		SignKey: nil,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to commit: %w", err)
@@ -200,6 +205,7 @@ func (p *GitProvider) Upload(sourceFilePath string, _ string) error {
 
 	// 推送到远程仓库
 	if err := p.repo.Push(&git.PushOptions{
+		Auth: p.auth,
 		RefSpecs: []config.RefSpec{
 			config.RefSpec(fmt.Sprintf("+%s:%s", plumbing.NewBranchReferenceName(p.config.Branch), plumbing.NewBranchReferenceName(p.config.Branch))),
 		},
