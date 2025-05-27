@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "git.esd.cc/imlonghao/adif2cloud/internal/winres"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/clublog"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/git"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/provider"
