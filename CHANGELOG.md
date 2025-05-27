@@ -1,3 +1,24 @@
+## v1.1.0 (2025-05-27)
+
+### Feat
+
+- **winres**: add Windows rescourse files
+- **clublog**: init provider
+- **git**: init provider
+- **log**: optimize log display
+
+### Fix
+
+- **git**: use auth on pull and push
+- **git**: parse config in main
+- **log**: remove dup provider field
+
+### Refactor
+
+- **providers**: make all creating log to DEBUG
+- **clublog**: make API_KEY private
+- **providers**: update GetName format
+
 ## v1.0.0 (2025-05-24)
 
 ### Feat
