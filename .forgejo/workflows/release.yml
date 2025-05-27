@@ -23,6 +23,7 @@ jobs:
         env:
           CLUBLOG_API_KEY: ${{ secrets.CLUBLOG_API_KEY }}
         run: |
+          go install github.com/tc-hib/go-winres@c4d55a3dfc2e22a4a9fb95ae0280ce106daadce9
           go generate ./...
           GOOS=windows GOARCH=amd64 go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags "-s -w -X git.esd.cc/imlonghao/adif2cloud/pkg/clublog.apiKey=${CLUBLOG_API_KEY}" -o adif2cloud-amd64.exe cmd/adif2cloud/main.go
           GOOS=linux GOARCH=amd64 go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags "-s -w -X git.esd.cc/imlonghao/adif2cloud/pkg/clublog.apiKey=${CLUBLOG_API_KEY}" -o adif2cloud-linux-amd64 cmd/adif2cloud/main.go
