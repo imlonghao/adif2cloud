@@ -43,7 +43,7 @@
           "0409": {
             "Comments": "",
             "CompanyName": "",
-            "FileDescription": "Monitor ADIF files and upload them to cloud services",
+            "FileDescription": "ADIF2Cloud",
             "FileVersion": "",
             "InternalName": "",
             "LegalCopyright": "© Hao Long",
