@@ -1,3 +1,12 @@
+## v1.2.0 (2025-05-29)
+
+### Feat
+
+- **webhook**: init
+- **watcher**: use nxadm/tail lib
+- **pkgs**: use retryablehttp lib
+- **goreleaser**: init
+
 ## v1.1.2 (2025-05-27)
 
 ## v1.1.1 (2025-05-27)
