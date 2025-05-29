@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-)
 
-var apiKey = ""
+	"git.esd.cc/imlonghao/adif2cloud/internal/consts"
+)
 
 // ClubLogConfig 定义了 Club Log 配置
 type ClubLogConfig struct {
@@ -24,8 +24,8 @@ type ClubLogProvider struct {
 
 // NewClubLogProvider 创建一个新的 ClubLogProvider 实例
 func NewClubLogProvider(cfg ClubLogConfig) *ClubLogProvider {
-	if apiKey == "" {
-		slog.Error("apiKey is not set")
+	if consts.ClubLogAPIKey == "" {
+		slog.Error("ClubLogAPIKey is not set")
 		return nil
 	}
 	slog.Debug("Creating Club Log provider",
@@ -56,7 +56,7 @@ func (p *ClubLogProvider) Upload(_ string, line string) error {
 	formData.Set("password", p.config.Password)
 	formData.Set("callsign", p.config.Callsign)
 	formData.Set("adif", line)
-	formData.Set("api", apiKey)
+	formData.Set("api", consts.ClubLogAPIKey)
 
 	// 发送 POST 请求
 	resp, err := http.PostForm("https://clublog.org/realtime.php", formData)

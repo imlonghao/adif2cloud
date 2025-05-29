@@ -27,3 +27,6 @@ go.work.sum
 
 # Windows rescourse file
 *.syso
+
+# Added by goreleaser init:
+dist/

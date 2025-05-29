@@ -3,30 +3,29 @@ name: Release a new version
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+        uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
       - name: Setup go
         uses: https://github.com/actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
-          go-version: '>=1.23.4'
-      - name: Build
-        env:
-          CLUBLOG_API_KEY: ${{ secrets.CLUBLOG_API_KEY }}
+          go-version: stable
+      - name: Prepare environment
         run: |
           go install github.com/tc-hib/go-winres@c4d55a3dfc2e22a4a9fb95ae0280ce106daadce9
-          go generate ./...
-          GOOS=windows GOARCH=amd64 go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags "-s -w -X git.esd.cc/imlonghao/adif2cloud/pkg/clublog.apiKey=${CLUBLOG_API_KEY}" -o adif2cloud-amd64.exe cmd/adif2cloud/main.go
-          GOOS=linux GOARCH=amd64 go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags "-s -w -X git.esd.cc/imlonghao/adif2cloud/pkg/clublog.apiKey=${CLUBLOG_API_KEY}" -o adif2cloud-linux-amd64 cmd/adif2cloud/main.go
-      - name: Release
-        uses: https://gitea.com/actions/release-action@21a5938ff2548f6472d89ba13b3cdd8af4c67068 # main
+      - name: Run GoReleaser
+        uses: https://github.com/goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6
         with:
-          files: |-
-            adif2cloud-amd64.exe
-            adif2cloud-linux-amd64
-          api_key: ${{ secrets.IMLONGHAO_BOT_TOKEN }}
+          version: "latest"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_RELEASE_TOKEN }}
+          GITEA_TOKEN: ${{ secrets.IMLONGHAO_BOT_TOKEN }}
+          CLUBLOG_API_KEY: ${{ secrets.CLUBLOG_API_KEY }}
