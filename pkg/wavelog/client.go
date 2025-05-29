@@ -7,6 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+
+	"git.esd.cc/imlonghao/adif2cloud/internal/consts"
+	"github.com/projectdiscovery/retryablehttp-go"
 )
 
 type Client struct {
@@ -34,19 +37,26 @@ func NewClient(apiURL, apiKey string, stationProfileID int) *Client {
 }
 
 func (c *Client) SendQSO(adiString string) error {
-	req := QSORequest{
+	qsoReq := QSORequest{
 		Key:              c.apiKey,
 		StationProfileID: strconv.Itoa(c.stationProfileID),
 		Type:             "adif",
 		String:           adiString,
 	}
 
-	jsonData, err := json.Marshal(req)
+	jsonData, err := json.Marshal(qsoReq)
 	if err != nil {
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	resp, err := http.Post(c.apiURL, "application/json", bytes.NewBuffer(jsonData))
+	client := retryablehttp.NewClient(retryablehttp.DefaultOptionsSingle)
+	req, err := retryablehttp.NewRequest(http.MethodPost, c.apiURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", fmt.Sprintf("adif2cloud/%s (+https://git.esd.cc/imlonghao/adif2cloud)", consts.Version))
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}

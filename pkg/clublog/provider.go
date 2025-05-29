@@ -6,8 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"git.esd.cc/imlonghao/adif2cloud/internal/consts"
+
+	"github.com/projectdiscovery/retryablehttp-go"
 )
 
 // ClubLogConfig 定义了 Club Log 配置
@@ -59,7 +62,14 @@ func (p *ClubLogProvider) Upload(_ string, line string) error {
 	formData.Set("api", consts.ClubLogAPIKey)
 
 	// 发送 POST 请求
-	resp, err := http.PostForm("https://clublog.org/realtime.php", formData)
+	client := retryablehttp.NewClient(retryablehttp.DefaultOptionsSingle)
+	req, err := retryablehttp.NewRequest(http.MethodPost, "https://clublog.org/realtime.php", strings.NewReader(formData.Encode()))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", fmt.Sprintf("adif2cloud/%s (+https://git.esd.cc/imlonghao/adif2cloud)", consts.Version))
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
