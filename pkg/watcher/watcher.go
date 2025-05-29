@@ -1,89 +1,56 @@
 package watcher
 
 import (
-	"bufio"
+	"io"
 	"log/slog"
-	"os"
 	"strings"
 
-	"github.com/fsnotify/fsnotify"
+	"github.com/nxadm/tail"
 )
 
 type ADIWatcher struct {
 	filePath string
-	watcher  *fsnotify.Watcher
+	tailer   *tail.Tail
 	callback func(string)
 }
 
 func NewADIWatcher(filePath string, callback func(string)) (*ADIWatcher, error) {
-	watcher, err := fsnotify.NewWatcher()
+	slog.Info("Creating ADI file watcher", "file_path", filePath)
+	t, err := tail.TailFile(filePath, tail.Config{
+		Location: &tail.SeekInfo{
+			Offset: 0,
+			Whence: io.SeekEnd,
+		},
+		Follow: true,
+	})
 	if err != nil {
 		return nil, err
 	}
-
-	slog.Info("Creating ADI file watcher", "file_path", filePath)
 	return &ADIWatcher{
 		filePath: filePath,
-		watcher:  watcher,
+		tailer:   t,
 		callback: callback,
 	}, nil
 }
 
 func (w *ADIWatcher) Start() error {
-	if err := w.watcher.Add(w.filePath); err != nil {
-		return err
-	}
-
 	slog.Info("Starting file monitoring", "file_path", w.filePath)
 	go w.watch()
 	return nil
 }
 
 func (w *ADIWatcher) watch() {
-	for {
-		select {
-		case event, ok := <-w.watcher.Events:
-			if !ok {
-				return
-			}
-			if event.Op&fsnotify.Write == fsnotify.Write {
-				w.processNewLines()
-			}
-		case err, ok := <-w.watcher.Errors:
-			if !ok {
-				return
-			}
-			slog.Error("File watcher error", "error", err)
-			panic(err)
+	cache := ""
+	for line := range w.tailer.Lines {
+		cache += line.Text
+		if strings.Contains(cache, "<eor>") {
+			w.callback(cache)
+			cache = ""
 		}
 	}
 }
 
-func (w *ADIWatcher) processNewLines() {
-	file, err := os.Open(w.filePath)
-	if err != nil {
-		slog.Error("Cannot open file", "file_path", w.filePath, "error", err)
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	var lastLine string
-	for scanner.Scan() {
-		lastLine = scanner.Text()
-	}
-
-	if err := scanner.Err(); err != nil {
-		slog.Error("Error while reading file", "file_path", w.filePath, "error", err)
-		return
-	}
-
-	if lastLine != "" && strings.Contains(lastLine, "<eor>") {
-		w.callback(lastLine)
-	}
-}
-
-func (w *ADIWatcher) Close() error {
+func (w *ADIWatcher) Close() {
 	slog.Info("Closing file watcher", "file_path", w.filePath)
-	return w.watcher.Close()
+	w.tailer.Cleanup()
 }

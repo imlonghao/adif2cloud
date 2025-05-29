@@ -259,9 +259,7 @@ func main() {
 	// Graceful shutdown
 	slog.Info("Shutting down...")
 	if adiWatcher != nil {
-		if err := adiWatcher.Close(); err != nil {
-			slog.Error("Failed to close ADI file watcher", "error", err)
-		}
+		adiWatcher.Close()
 	}
 	slog.Info("Safely exited")
 }
