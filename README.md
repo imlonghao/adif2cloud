@@ -49,6 +49,8 @@ target:
     email: "your.email@example.com"
     password: "your-clublog-password"
     callsign: BA0AN
+  - type: webhook
+    url: "https://example.com/webhook"
 ```
 
 ## Usage

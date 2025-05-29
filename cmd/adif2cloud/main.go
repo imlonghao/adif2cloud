@@ -14,6 +14,7 @@ import (
 	"git.esd.cc/imlonghao/adif2cloud/pkg/s3"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/watcher"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/wavelog"
+	"git.esd.cc/imlonghao/adif2cloud/pkg/webhook"
 
 	"github.com/spf13/viper"
 )
@@ -130,6 +131,19 @@ func main() {
 				}
 				providers = append(providers, gitProvider)
 				slog.Info("Created Git provider", "repo_url", gitConfig.RepoURL, "branch", gitConfig.Branch)
+
+			case "webhook":
+				url, _ := target["url"].(string)
+				if url == "" {
+					slog.Error("url is required for webhook target", "target", target)
+					continue
+				}
+
+				webhookProvider := webhook.NewWebhookProvider(webhook.WebhookConfig{
+					URL: url,
+				})
+				providers = append(providers, webhookProvider)
+				slog.Info("Created Webhook provider", "url", url)
 
 			case "s3":
 				s3Config := s3.S3Config{}
