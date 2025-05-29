@@ -26,6 +26,6 @@ jobs:
           version: "latest"
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_RELEASE_TOKEN }}
           GITEA_TOKEN: ${{ secrets.IMLONGHAO_BOT_TOKEN }}
           CLUBLOG_API_KEY: ${{ secrets.CLUBLOG_API_KEY }}
+          GORELEASER_FORCE_TOKEN: gitea
