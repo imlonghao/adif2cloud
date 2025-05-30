@@ -31,4 +31,8 @@ jobs:
           GORELEASER_FORCE_TOKEN: gitea
       - name: Sync to GitHub
         run: |
-          curl -s "${{ secrets.ACTIVEPIECES_WEBHOOK }}" -d "version=${{ github.event.release.tag_name }}"
+          pip install requests
+          python scripts/sync-to-github.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_RELEASE_TOKEN }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
