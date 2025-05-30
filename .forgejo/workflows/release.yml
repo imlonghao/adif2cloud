@@ -29,3 +29,6 @@ jobs:
           GITEA_TOKEN: ${{ secrets.IMLONGHAO_BOT_TOKEN }}
           CLUBLOG_API_KEY: ${{ secrets.CLUBLOG_API_KEY }}
           GORELEASER_FORCE_TOKEN: gitea
+      - name: Sync to GitHub
+        run: |
+          curl -s "${{ secrets.ACTIVEPIECES_WEBHOOK }}"
