@@ -28,6 +28,7 @@ github_release = requests.post(
 for asset in os.listdir("dist"):
     if not asset.endswith((".tar.zst", ".zip")):
         continue
+    print(f"Uploading {asset}")
     requests.post(
         f"https://uploads.github.com/repos/imlonghao/adif2cloud/releases/{github_release['id']}/assets",
         params={
