@@ -1,6 +1,6 @@
 package consts
 
-const (
+var (
 	Version       = "develop"
 	ClubLogAPIKey = ""
 )
