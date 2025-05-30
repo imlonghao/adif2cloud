@@ -31,4 +31,4 @@ jobs:
           GORELEASER_FORCE_TOKEN: gitea
       - name: Sync to GitHub
         run: |
-          curl -s "${{ secrets.ACTIVEPIECES_WEBHOOK }}"
+          curl -s "${{ secrets.ACTIVEPIECES_WEBHOOK }}" -d "version=${{ github.event.release.tag_name }}"
