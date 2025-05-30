@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"git.esd.cc/imlonghao/adif2cloud/internal/consts"
 	_ "git.esd.cc/imlonghao/adif2cloud/internal/winres"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/clublog"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/git"
@@ -25,6 +26,8 @@ func main() {
 		Level: slog.LevelInfo,
 	}))
 	slog.SetDefault(logger)
+
+	slog.Info("Starting adif2cloud", "version", consts.Version)
 
 	// Parse command line arguments
 	configPath := flag.String("config", "config.yaml", "Path to configuration file")
