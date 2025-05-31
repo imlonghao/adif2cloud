@@ -2,8 +2,8 @@ package adif
 
 import (
 	"bytes"
-	"html/template"
 	"strings"
+	"text/template"
 
 	"github.com/Matir/adifparser"
 )
