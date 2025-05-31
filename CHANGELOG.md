@@ -1,3 +1,13 @@
+## v1.3.2 (2025-05-31)
+
+### Feat
+
+- **main**: allow to choose whether download remote file
+
+### Fix
+
+- **adif**: use text/template
+
 ## v1.3.1 (2025-05-31)
 
 ### Fix
