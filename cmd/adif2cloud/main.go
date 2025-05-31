@@ -146,16 +146,19 @@ func main() {
 				if method == "" {
 					method = "GET"
 				}
-				headers, _ := target["headers"].(map[string]string)
-				if headers == nil {
-					headers = make(map[string]string)
+				headers, _ := target["headers"].(map[string]interface{})
+				headerMap := make(map[string]string)
+				for k, v := range headers {
+					if strVal, ok := v.(string); ok {
+						headerMap[k] = strVal
+					}
 				}
 				body, _ := target["body"].(string)
 
 				webhookProvider := webhook.NewWebhookProvider(webhook.WebhookConfig{
 					URL:     url,
 					Method:  method,
-					Headers: headers,
+					Headers: headerMap,
 					Body:    body,
 				})
 				providers = append(providers, webhookProvider)
