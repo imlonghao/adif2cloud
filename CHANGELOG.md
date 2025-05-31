@@ -1,3 +1,10 @@
+## v1.3.1 (2025-05-31)
+
+### Fix
+
+- **main**: fix header parser
+- **hamcq**: status code should be 200
+
 ## v1.3.0 (2025-05-31)
 
 ### Feat
