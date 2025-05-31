@@ -56,6 +56,8 @@ target:
       X-Header: "value"
     body: |
       {"callsign": "{{.call}}"}
+  - type: hamcq
+    key: "YOUR_API_KEY"
 ```
 
 ## Usage

@@ -11,6 +11,7 @@ import (
 	_ "git.esd.cc/imlonghao/adif2cloud/internal/winres"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/clublog"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/git"
+	"git.esd.cc/imlonghao/adif2cloud/pkg/hamcq"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/provider"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/s3"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/watcher"
@@ -196,6 +197,17 @@ func main() {
 				}
 				providers = append(providers, s3Provider)
 				slog.Info("Created S3 provider", "endpoint", s3Config.Endpoint, "bucket", s3Config.BucketName)
+
+			case "hamcq":
+				key, _ := target["key"].(string)
+				if key == "" {
+					slog.Error("key is required for hamcq target", "target", target)
+					continue
+				}
+				hamcqProvider := hamcq.NewHamCQProvider(hamcq.HamCQConfig{Key: key})
+				providers = append(providers, hamcqProvider)
+				slog.Info("Created HamCQ provider", "key", key)
+
 			default:
 				slog.Warn("Unknown target type", "type", targetType)
 			}
