@@ -71,3 +71,6 @@ release:
 gitea_urls:
   api: https://git.esd.cc/api/v1
   download: https://git.esd.cc
+
+checksum:
+  disable: true
