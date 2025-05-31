@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"git.esd.cc/imlonghao/adif2cloud/internal/consts"
@@ -251,23 +253,32 @@ func main() {
 
 	// 如果远程文件更大，则下载替换本地文件
 	if maxRemoteSize > localSize {
-		slog.Info("Remote file is larger, downloading...",
+		slog.Info("Remote file is larger",
 			"local_size", localSize,
-			"remote_size", maxRemoteSize)
+			"remote_size", maxRemoteSize,
+			"provider", maxRemoteProvider.GetName())
 
-		sourceFileWriter, err := os.OpenFile(sourceFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-		if err != nil {
-			slog.Error("Failed to open local file", "error", err)
-			os.Exit(1)
-		}
-		// 直接下载到目标文件
-		if err := maxRemoteProvider.Download(sourceFileWriter); err != nil {
-			slog.Error("Failed to download remote file", "error", err)
-			os.Exit(1)
-		}
-		sourceFileWriter.Close()
+		slog.Info("Should we download the remote file? [y/N]")
+		reader := bufio.NewReader(os.Stdin)
+		answer, _ := reader.ReadString('\n')
+		answer = strings.TrimSpace(strings.ToLower(answer))
+		if answer == "y" || answer == "yes" {
+			sourceFileWriter, err := os.OpenFile(sourceFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+			if err != nil {
+				slog.Error("Failed to open local file", "error", err)
+				os.Exit(1)
+			}
+			// 直接下载到目标文件
+			if err := maxRemoteProvider.Download(sourceFileWriter); err != nil {
+				slog.Error("Failed to download remote file", "error", err)
+				os.Exit(1)
+			}
+			sourceFileWriter.Close()
 
-		slog.Info("Successfully replaced local file with remote file")
+			slog.Info("Successfully replaced local file with remote file")
+		} else {
+			slog.Info("Skipping download")
+		}
 	}
 
 	// Create watcher for the source file
