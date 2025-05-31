@@ -1,3 +1,11 @@
+## v1.3.0 (2025-05-31)
+
+### Feat
+
+- **hamcq**: init
+- **webhook**: support custom method, header and body
+- show version on startup
+
 ## v1.2.2 (2025-05-30)
 
 ### Fix
