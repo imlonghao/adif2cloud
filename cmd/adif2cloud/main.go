@@ -141,9 +141,21 @@ func main() {
 					slog.Error("url is required for webhook target", "target", target)
 					continue
 				}
+				method, _ := target["method"].(string)
+				if method == "" {
+					method = "GET"
+				}
+				headers, _ := target["headers"].(map[string]string)
+				if headers == nil {
+					headers = make(map[string]string)
+				}
+				body, _ := target["body"].(string)
 
 				webhookProvider := webhook.NewWebhookProvider(webhook.WebhookConfig{
-					URL: url,
+					URL:     url,
+					Method:  method,
+					Headers: headers,
+					Body:    body,
 				})
 				providers = append(providers, webhookProvider)
 				slog.Info("Created Webhook provider", "url", url)

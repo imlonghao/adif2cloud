@@ -51,6 +51,11 @@ target:
     callsign: BA0AN
   - type: webhook
     url: "https://example.com/webhook"
+    method: "GET"
+    headers:
+      X-Header: "value"
+    body: |
+      {"callsign": "{{.call}}"}
 ```
 
 ## Usage

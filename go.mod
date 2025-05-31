@@ -5,6 +5,7 @@ go 1.24.0
 toolchain go1.24.3
 
 require (
+	github.com/Matir/adifparser v0.0.0-20230124172935-2c465737f437
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.67
