@@ -82,7 +82,7 @@ func (p *HamCQProvider) Upload(_ string, line string) error {
 	}
 
 	// 检查状态码
-	if resp.StatusCode < http.StatusMultipleChoices {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
