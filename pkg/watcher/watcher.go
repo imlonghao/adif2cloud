@@ -18,7 +18,6 @@ func NewADIWatcher(filePath string, callback func(string)) (*ADIWatcher, error) 
 	slog.Info("Creating ADI file watcher", "file_path", filePath)
 	t, err := tail.TailFile(filePath, tail.Config{
 		Location: &tail.SeekInfo{
-			Offset: 0,
 			Whence: io.SeekEnd,
 		},
 		Follow: true,
@@ -41,7 +40,20 @@ func (w *ADIWatcher) Start() error {
 
 func (w *ADIWatcher) watch() {
 	cache := ""
+	var offset int64
 	for line := range w.tailer.Lines {
+		if line.SeekInfo.Offset <= offset {
+			w.tailer.Stop()
+			w.tailer, _ = tail.TailFile(w.filePath, tail.Config{
+				Location: &tail.SeekInfo{
+					Whence: io.SeekEnd,
+				},
+				Follow: true,
+			})
+			go w.watch()
+			return
+		}
+		offset = line.SeekInfo.Offset
 		cache += line.Text
 		if strings.Contains(cache, "<eor>") {
 			w.callback(cache)
