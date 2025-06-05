@@ -27,7 +27,7 @@ type HamQTHProvider struct {
 
 // NewHamQTHProvider 创建一个新的 HamQTHProvider 实例
 func NewHamQTHProvider(cfg HamQTHConfig) *HamQTHProvider {
-	slog.Debug("Creating HamQTH provider", "username", cfg.Username)
+	slog.Debug("Creating HamQTH provider", "username", cfg.Username, "callsign", cfg.Callsign)
 	return &HamQTHProvider{
 		config: cfg,
 	}
@@ -94,5 +94,5 @@ func (p *HamQTHProvider) Upload(_ string, line string) error {
 
 // GetName 获取提供商的名称
 func (p *HamQTHProvider) GetName() string {
-	return fmt.Sprintf("HamQTH->%s", p.config.Username)
+	return fmt.Sprintf("HamQTH->%s-%s", p.config.Username, p.config.Callsign)
 }
