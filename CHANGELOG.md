@@ -1,3 +1,10 @@
+## v1.4.0 (2025-06-05)
+
+### Feat
+
+- **hamqth**: init provider
+- **watcher**: retail the file when changed
+
 ## v1.3.2 (2025-05-31)
 
 ### Feat
