@@ -58,6 +58,10 @@ target:
       {"callsign": "{{.call}}"}
   - type: hamcq
     key: "YOUR_API_KEY"
+  - type: hamqth
+    username: "YOUR_USERNAME" # required
+    password: "YOUR_PASSWORD" # required
+    callsign: "YOUR_CALLSIGN" # optional
 ```
 
 ## Usage

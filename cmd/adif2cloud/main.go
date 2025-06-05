@@ -14,6 +14,7 @@ import (
 	"git.esd.cc/imlonghao/adif2cloud/pkg/clublog"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/git"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/hamcq"
+	"git.esd.cc/imlonghao/adif2cloud/pkg/hamqth"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/provider"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/s3"
 	"git.esd.cc/imlonghao/adif2cloud/pkg/watcher"
@@ -212,6 +213,22 @@ func main() {
 				hamcqProvider := hamcq.NewHamCQProvider(hamcq.HamCQConfig{Key: key})
 				providers = append(providers, hamcqProvider)
 				slog.Info("Created HamCQ provider", "key", key)
+
+			case "hamqth":
+				username, _ := target["username"].(string)
+				password, _ := target["password"].(string)
+				callsign, _ := target["callsign"].(string)
+				if username == "" || password == "" {
+					slog.Error("username or password is missing for hamqth target", "target", target)
+					continue
+				}
+				hamqthProvider := hamqth.NewHamQTHProvider(hamqth.HamQTHConfig{
+					Username: username,
+					Password: password,
+					Callsign: callsign,
+				})
+				providers = append(providers, hamqthProvider)
+				slog.Info("Created HamQTH provider", "username", username, "callsign", callsign)
 
 			default:
 				slog.Warn("Unknown target type", "type", targetType)
